@@ -22,13 +22,15 @@ import java.util.regex.Pattern;
 public class LoginServlet extends HttpServlet {
 
     private static final String FIRST_NAME_PATTERN="^[A-Z]{1}[a-zA-Z]{2}[a-zA-z0-9]*";
+    private static final String PASSWORD_PATTERN="^(?=.*[@#$%^&+=])(?=.*[0-9])(?=.*[A-Z]).{8,}$";
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String user=req.getParameter("user");
         boolean validateFirstName = validateFirstName(user);
         boolean checkFirstName = checkFirstName(req, resp, validateFirstName);
         String pwd=req.getParameter("pwd");
-
+        boolean validatePassword = validatePassword(pwd);
+        boolean checkPassword = checkPassword(req, resp, validatePassword);
         //get servlet config init params
         String userID=getServletConfig().getInitParameter("user");
         String password=getServletConfig().getInitParameter("password");
@@ -44,6 +46,24 @@ public class LoginServlet extends HttpServlet {
             rd.include(req,resp);
         }
     }
+
+    private boolean checkPassword(HttpServletRequest req, HttpServletResponse resp, boolean validatePassword) throws IOException {
+        if(validatePassword == false){
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.jsp");
+            PrintWriter out = resp.getWriter();
+            out.println("<font color=red>Invalid Password: Password - Rule1 – minimum 8 Characters - Rule2 – Should have at least 1 UpperCase- Rule3 – Should have at least 1 numeric number in the password - Rule4 – Has exactly 1 Special Character</font>");
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean validatePassword(String pwd) {
+        Pattern check = Pattern.compile(PASSWORD_PATTERN);
+        boolean value = check.matcher(pwd).matches();
+        return value;
+    }
+
     private boolean checkFirstName(HttpServletRequest request, HttpServletResponse response, boolean validateFirstName) throws IOException, ServletException {
         if (validateFirstName==false){
             RequestDispatcher rd=getServletContext().getRequestDispatcher("/login.jsp");
