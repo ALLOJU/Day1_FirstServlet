@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
 
 @WebServlet(
         description = "Login Servlet Testing",
@@ -19,9 +20,13 @@ import java.io.PrintWriter;
         }
 )
 public class LoginServlet extends HttpServlet {
+
+    private static final String FIRST_NAME_PATTERN="^[A-Z]{1}[a-zA-Z]{2}[a-zA-z0-9]*";
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String user=req.getParameter("user");
+        boolean validateFirstName = validateFirstName(user);
+        boolean checkFirstName = checkFirstName(req, resp, validateFirstName);
         String pwd=req.getParameter("pwd");
 
         //get servlet config init params
@@ -39,4 +44,23 @@ public class LoginServlet extends HttpServlet {
             rd.include(req,resp);
         }
     }
+    private boolean checkFirstName(HttpServletRequest request, HttpServletResponse response, boolean validateFirstName) throws IOException, ServletException {
+        if (validateFirstName==false){
+            RequestDispatcher rd=getServletContext().getRequestDispatcher("/login.jsp");
+            PrintWriter out=response.getWriter();
+            out.println("<font color=red>user name is Incorrect</font>");
+            rd.include(request,response);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateFirstName(String firstName) {
+
+
+        Pattern check= Pattern.compile(FIRST_NAME_PATTERN);
+        boolean value=check.matcher(firstName).matches();
+        return value;
+    }
 }
+
